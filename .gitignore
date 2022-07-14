@@ -1,0 +1,6 @@
+### Python ###
+__pycache__
+
+# tooling caches
+.mypy_cache
+.pytest_cache

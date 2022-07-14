@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "py_core"
+version = "0.1.0"
+description = ""
+authors = ["Snapper <learningwithsnapper@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+pandas = "^1.4.3"
+ortools = "^9.3.10497"
+PICOS = "^2.4.1"
+matplotlib = "^3.5.2"
+xxhash = "^3.0.0"
+
+[tool.poetry.dev-dependencies]
+blacksquare = "^0.3.1"
+pytest = "^7.1.2"
+guppy3 = "^3.1.2"
+black = "^22.6.0"
+mypy = "^0.961"
+
+#[tools.mypy]
+## Todo: is this actually working?
+#plugins = "numpy.typing.mypy_plugin"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
