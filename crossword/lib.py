@@ -1,11 +1,7 @@
 ### DIRECTIONS ###
 import enum
 import itertools
-from functools import partial
-from typing import Callable, Any, Iterator, Optional
-from ortools.sat.python import cp_model
-from numpy.typing import NDArray
-
+from typing import Callable, Iterator, Optional
 
 CellCoords = tuple[int, int]
 

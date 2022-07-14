@@ -5,9 +5,8 @@ from typing import Any
 
 import numpy as np
 from ortools.sat.python import cp_model
-from crossword.lib import BLACK, WHITE, OUT_OF_BOUNDS, Across, Down, check_cell
-import xxhash
 
+from crossword.lib import BLACK, Across, Down, check_cell
 
 xw = np.ones((3, 3), str)
 xw[2, 0] = xw[0, 2] = BLACK.value
