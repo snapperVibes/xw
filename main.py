@@ -1,4 +1,5 @@
 import itertools
+import time
 from collections import defaultdict
 from functools import partial
 from typing import Any
@@ -6,28 +7,50 @@ from typing import Any
 import numpy as np
 from ortools.sat.python import cp_model
 
-from crossword.lib import BLACK, Across, Down, check_cell
+from crossword.lib import BLACK, Across, Down, check_cell, read_vocabulary
 
-xw = np.ones((3, 3), str)
-xw[2, 0] = xw[0, 2] = BLACK.value
+vocab = read_vocabulary()
 
+xw = np.ones((5, 5), str)
+# xw[2, 0] = xw[0, 2] = BLACK.value
+#
 ascii_domain = cp_model.Domain(ord("A"), ord("Z"))
 
 # fmt: off
-vocab_strs = ["as", "in", "is", "it", "if", "at", "fun", "tad", "nag", "sag", "nut", "go", "to", "no", "do" ] # fmt: on
-vocab_tups = map(lambda word: [ord(letter.upper()) for letter in word], vocab_strs)
+# vocab_strs = ["as", "in", "is", "it", "if", "at", "fun", "tad", "nag", "sag", "nut", "go", "to", "no", "do" ] # fmt: on
+# vocab_tups = map(lambda word: [ord(letter.upper()) for letter in word], vocab_strs)
 
 allowed_assignments =  defaultdict(lambda: [])
-for word in vocab_tups:
+for word in vocab:
     allowed_assignments[len(word)].append(word)
 
+
+class XWPrinter(cp_model.CpSolverSolutionCallback):
+    def __init__(self, cells, grid_size):
+        cp_model.CpSolverSolutionCallback.__init__(self)
+        self._cells = cells
+        self._grid_size = grid_size
+        self._start_time = time.time()
+        self._solution_count = 0
+
+    def on_solution_callback(self):
+        current_time = time.time()
+        self._solution_count += 1
+        result = np.zeros((self._grid_size, self._grid_size)).astype(str)
+        for i in range(self._grid_size):
+            for j in range(self._grid_size):
+                result[i, j] = chr(self.Value(self._cells[i, j]))
+        print("Time:", current_time - self._start_time)
+        print("Solution #: ", self._solution_count)
+        print(result)
+        print("-" * 3)
 
 
 
 def solve_with_cp(grid):
-    assert grid.shape == (3, 3)
+    # assert grid.shape == (3, 3)
 
-    grid_size = 3
+    grid_size = 5
     model = cp_model.CpModel()  # Step 1
 
     cells: dict[[int, int], Any] = {}
@@ -119,11 +142,16 @@ def solve_with_cp(grid):
 
 
 
-
+    printer = XWPrinter(cells, grid_size)
     solver = cp_model.CpSolver()
+    solver.parameters.enumerate_all_solutions = True
 
-    result = np.zeros((grid_size, grid_size)).astype(str)
-    status = solver.Solve(model)
+    # def _log_callback(self, x):
+    #     print(x)
+    # solver.log_callback = _log_callback
+
+    status = solver.Solve(model, printer)
+
     if not(status in (cp_model.FEASIBLE, cp_model.OPTIMAL)):
         print("OH NO!")
         if status == cp_model.UNKNOWN:
@@ -133,11 +161,7 @@ def solve_with_cp(grid):
         elif status == cp_model.INFEASIBLE:
             print("INFEASIBLE")
         raise RuntimeError
-    for i in range(grid_size):
-        for j in range(grid_size):
-            result[i, j] = chr(solver.Value(cells[i, j]))
-    return result
+
 
 
 res = solve_with_cp(xw)
-print(res)

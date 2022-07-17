@@ -1,6 +1,9 @@
+# https://www.cruciverb.com/index.php?action=ezportal;sa=page;p=70
+
 ### DIRECTIONS ###
 import enum
 import itertools
+import os.path
 from typing import Callable, Iterator, Optional
 
 CellCoords = tuple[int, int]
@@ -110,3 +113,22 @@ class _Down(BaseDirection, Mixin_TryNextCell_ReturnAndContinueIfWhite):
 
 Across: _Across = _Across()
 Down: _Down = _Down()
+
+
+def read_vocabulary(file_path=None):
+    if file_path is None:
+        file_path = os.path.join("vocab", "default.dict")
+    # vocab = {}
+    vocab = []
+    with open(file_path) as f:
+        for line in f:
+            if line.startswith("#"):
+                continue
+            word, score = line.strip().split(";")
+            normalized = word.strip().upper().replace(" ", "").replace("-", "").replace("'", "")
+            vocab.append(normalized)
+            score_ = int(score)
+            # vocab.append((normalized, score_))
+    return map(lambda word: [ord(letter.upper()) for letter in word], vocab)
+
+
